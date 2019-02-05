@@ -1,0 +1,19 @@
+{
+  "name": "jsoto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "toto.js",
+  "scripts": {
+    "start": "node lbc-parser.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dateformat": "*",
+    "nodemailer": "^5.1.1",
+    "pug": "*",
+    "request": "^2.88.0",
+    "node-schedule": "*"
+  }
+}

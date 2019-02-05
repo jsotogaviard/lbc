@@ -1,0 +1,5 @@
+{
+    "cron_frequency": "*/10 * * * * *",
+    "url": "https%3A%2F%2Fwww.leboncoin.fr%2Frecherche%2F%3Fcategory%3D9%26location%3DToulouse_31000%2CToulouse_31300%26price%3D400000-550000%26rooms%3D3-max%26square%3D100-max%0D%0A",
+    "current": "./data/current.csv"
+}
