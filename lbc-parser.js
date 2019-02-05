@@ -6,13 +6,21 @@ const schedule = require('node-schedule');
 const config = require('./config.json');
 const credential = require('./credential.json');
 
-schedule.scheduleJob(config.cron_frequency, function () {
+const keys = credential.scraper_api_keys
+const minute = 60 / keys.length
+const minuteAsInt = Math.round(minute);
+var cron_frequency = " */" + minuteAsInt + " * * * *" //8-20
+console.log(cron_frequency)
+
+schedule.scheduleJob(cron_frequency, function () {
 //schedule.scheduleJob("*/10 * * * * * ", function () {
-  console.log(new Date())
+  const now = new Date()  
+  console.log(now)
+  const index = now.getMinutes() % keys.length
   request(
     {
       method: 'GET',
-      url: 'http://api.scraperapi.com/?key=' + credential.scraper_api_key + '&url=' + config.url,
+      url: 'http://api.scraperapi.com/?key=' + keys[index] + '&url=' + config.url,
       headers: {
         Accept: 'application/json',
       },
@@ -23,7 +31,10 @@ schedule.scheduleJob(config.cron_frequency, function () {
         console.log(body)
         console.log(error)
       } else {
+        // url regex
+        const regex_url = /href=\"\/ventes_immobilieres\/(.*?).htm/g
 
+        // Name regex
         const regex = /<span itemprop="name" data-qa-id="aditem_title".*?>(.*?)<\/span>/g;
         const receivedData = []
         var record = regex.exec(body)
