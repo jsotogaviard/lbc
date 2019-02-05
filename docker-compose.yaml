@@ -2,3 +2,5 @@ version: '2'
 services:
   lbc-parser:
     build: .
+    volumes:
+      - ./data:/usr/src/app/data
