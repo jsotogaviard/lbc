@@ -12,8 +12,8 @@ const minuteAsInt = Math.round(minute);
 var cron_frequency = " */" + minuteAsInt + " 8-20 * * *" //8-20
 console.log(cron_frequency)
 
-//schedule.scheduleJob(cron_frequency, function () {
-schedule.scheduleJob("*/10 * * * * * ", function () {
+schedule.scheduleJob(cron_frequency, function () {
+//schedule.scheduleJob("*/10 * * * * * ", function () {
   const now = new Date()  
   console.log(now)
   const index = now.getMinutes() % keys.length
