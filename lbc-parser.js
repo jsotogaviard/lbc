@@ -12,8 +12,8 @@ const minuteAsInt = Math.round(minute);
 var cron_frequency = " */" + minuteAsInt + " 8-20 * * *" //8-20
 console.log(cron_frequency)
 
-schedule.scheduleJob(cron_frequency, function () {
-//schedule.scheduleJob("*/10 * * * * * ", function () {
+//schedule.scheduleJob(cron_frequency, function () {
+schedule.scheduleJob("*/10 * * * * * ", function () {
   const now = new Date()  
   console.log(now)
   const index = now.getMinutes() % keys.length
@@ -35,22 +35,27 @@ schedule.scheduleJob(cron_frequency, function () {
         const regex_url = /href=\"\/ventes_immobilieres\/(.*?).htm/g
 
         // Name regex
-        const regex = /<span itemprop="name" data-qa-id="aditem_title".*?>(.*?)<\/span>/g;
+        const regex_title = /<span itemprop="name" data-qa-id="aditem_title".*?>(.*?)<\/span>/g;
         const receivedData = []
-        var record = regex.exec(body)
-        while(record !== null){
-          receivedData.push(record[1])
-          record = regex.exec(body)
+        var title = regex_title.exec(body)
+        var url = regex_url.exec(body)
+        while(title !== null){
+          receivedData.push({
+            title: title[1],
+            url: url[1]
+          })
+          title = regex_title.exec(body)
+          url = regex_url.exec(body)
         }
-
+        const urlReceivedData = toSet(receivedData)    
         if (fs.existsSync(config.current)) {
           // Read current file
-          fs.readFile(config.current, "utf8", function read(err, storedDataIn) {
+          fs.readFile(config.current, "utf8", function read(err, urlDataIn) {
             if (err) {
               throw err;
             }
-            storedData = storedDataIn.split("\n")
-            if (!arraysAreEqual(receivedData, storedData)) {
+            const urlData = new Set(urlDataIn.split("\n"))
+            if (isSuperset(urlReceivedData, urlData)) {
 
               // Rotate current file
               var now = new Date();
@@ -61,7 +66,7 @@ schedule.scheduleJob(cron_frequency, function () {
                 console.log('renamed complete');
 
                 // Persist new 
-                writeCurrent(receivedData)
+                writeCurrent(urlReceivedData)
 
                 // Send email
                 sendEmail(receivedData)
@@ -73,7 +78,7 @@ schedule.scheduleJob(cron_frequency, function () {
           });
         } else {
           // Persist new 
-          writeCurrent(receivedData)
+          writeCurrent(urlReceivedData)
 
           // Send email
           sendEmail(receivedData)
@@ -104,11 +109,15 @@ function sendEmail(receivedData) {
   });
 
   // setup email data with unicode symbols
+  var text = ''
+  receivedData.forEach(element => {
+    text += element.title + ' https://www.leboncoin.fr/ventes_immobilieres/' + element.url + '.htm \n' 
+  });
   let mailOptions = {
     from: 'LeChat', // sender address
     to: "jsotogaviard@gmail.com, armance.chassaigne@gmail.com", // list of receivers
     subject: "Nouvelle Annonce LBC", // Subject line
-    text: receivedData.join("\n")
+    text: text
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
@@ -119,13 +128,19 @@ function sendEmail(receivedData) {
   transporter.close();
 }
 
-function arraysAreEqual(x, y) {
-  var objectsAreSame = true;
-  for (var propertyName in x) {
-    if (x[propertyName] !== y[propertyName]) {
-      objectsAreSame = false;
-      break;
+function toSet(receivedData) {
+  const urlData = []
+  receivedData.forEach(function(element) {
+    urlData.push(element.url)
+  });
+  return new Set(urlData)
+}
+
+function isSuperset(set, subset) {
+  for (var elem of subset) {
+    if (!set.has(elem)) {
+      return false;
     }
   }
-  return objectsAreSame;
+  return true;
 }
