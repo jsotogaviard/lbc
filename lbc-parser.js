@@ -9,7 +9,7 @@ const credential = require('./credential.json');
 const keys = credential.scraper_api_keys
 const minute = 60 / keys.length
 const minuteAsInt = Math.round(minute);
-var cron_frequency = " */" + minuteAsInt + " * * * *" //8-20
+var cron_frequency = " */" + minuteAsInt + " 8-20 * * *" //8-20
 console.log(cron_frequency)
 
 schedule.scheduleJob(cron_frequency, function () {
